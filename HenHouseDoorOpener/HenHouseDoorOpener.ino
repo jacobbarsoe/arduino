@@ -14,9 +14,10 @@
 
 #define STEPPER_DIR 4
 #define STEPPER_STEP 5
-#define STEPPER_SLEEP 6
-#define STEPPER_ENABLE 7
 #define STEPPER_POWER 8
+
+#define RTC_VCC 6
+
 
 AccelStepper stepper(AccelStepper::DRIVER, STEPPER_STEP, STEPPER_DIR);
 
