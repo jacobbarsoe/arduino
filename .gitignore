@@ -1,0 +1,7 @@
+RemoteSystemsTempFiles
+.metadata
+*/.cproject
+*/.project
+*/.settings
+*/spec.d
+
