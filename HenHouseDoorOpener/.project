@@ -29,31 +29,66 @@
 		<link>
 			<name>Libraries/AccelStepper</name>
 			<type>2</type>
-			<locationURI>ArduinoPivateLibPath/AccelStepper</locationURI>
+			<locationURI>ArduinoPrivateLibPath/AccelStepper</locationURI>
+		</link>
+		<link>
+			<name>Libraries/DS3232RTC</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/DS3232RTC</locationURI>
+		</link>
+		<link>
+			<name>Libraries/MySleep</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/MySleep</locationURI>
+		</link>
+		<link>
+			<name>Libraries/Streaming</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/Streaming</locationURI>
+		</link>
+		<link>
+			<name>Libraries/Sunrise</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/Sunrise</locationURI>
+		</link>
+		<link>
+			<name>Libraries/Wire</name>
+			<type>2</type>
+			<locationURI>ArduinoHardwareLibPath/Wire</locationURI>
+		</link>
+		<link>
+			<name>Libraries/time</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/time</locationURI>
+		</link>
+		<link>
+			<name>Libraries/timelord</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/timelord</locationURI>
 		</link>
 		<link>
 			<name>arduino/core</name>
 			<type>2</type>
-			<locationURI>ArduinoPlatformPath/cores/arduino</locationURI>
+			<locationURI>ArduinoPlatformPath/arduino</locationURI>
 		</link>
 		<link>
 			<name>arduino/variant</name>
 			<type>2</type>
-			<locationURI>ArduinoPinPath/standard</locationURI>
+			<locationURI>ArduinoPinPath/eightanaloginputs</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>ArduinoHardwareLibPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr/libraries</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/libraries</value>
 		</variable>
 		<variable>
 			<name>ArduinoPinPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr/variants</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/variants</value>
 		</variable>
 		<variable>
 			<name>ArduinoPlatformPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/cores</value>
 		</variable>
 	</variableList>
 </projectDescription>

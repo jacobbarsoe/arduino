@@ -21,7 +21,15 @@
 								<option id="it.baeyens.arduino.compiler.cpp.sketch.option.incpath.1045161163" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Streaming}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/AccelStepper}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/DS3232RTC}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/MySleep}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Sunrise}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Wire/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/time}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/timelord}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.1660751000" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -29,7 +37,15 @@
 								<option id="it.baeyens.arduino.compiler.c.sketch.option.incpath.427547444" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Streaming}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/AccelStepper}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/DS3232RTC}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/MySleep}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Sunrise}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/Wire/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/time}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HenHouseDoorOpener/Libraries/timelord}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.2075456613" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>
@@ -61,4 +77,5 @@
 			<resource resourceType="PROJECT" workspacePath="/HenHouseDoorOpener"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
