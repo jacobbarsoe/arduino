@@ -4,3 +4,6 @@
 [submodule "libraries/time"]
 	path = libraries/time
 	url = git@github.com:PaulStoffregen/Time.git
+[submodule "libraries/timelord"]
+	path = libraries/timelord
+	url = git@github.com:probonopd/TimeLord.git
