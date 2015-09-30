@@ -24,7 +24,7 @@ void setupSteppers()
 	stepper.setMaxSpeed(100000);
 	stepper.setAcceleration(1000);
 
-	stepper.setCurrentPosition(OPEN * length);
+	stepper.setCurrentPosition(OPEN);
 
 	digitalWrite(STEPPER_POWER, 0);
 	digitalWrite(STEPPER_DIR, 1);
@@ -50,13 +50,13 @@ void togglePosition()
 	long pos = stepper.currentPosition();
 	//restore
 	enableStepperPower();
-	if (pos == CLOSE*length)
+	if (pos == CLOSE)
 	{
-		stepper.runToNewPosition(OPEN*length);
+		stepper.runToNewPosition(OPEN);
 	}
 	else
 	{
-		stepper.runToNewPosition(CLOSE*length);
+		stepper.runToNewPosition(CLOSE);
 	}
 	disableStepperPower();
 }
@@ -65,7 +65,7 @@ void runToOpenPosition()
 {
 	//restore
 	enableStepperPower();
-	stepper.runToNewPosition(OPEN * length);
+	stepper.runToNewPosition(OPEN);
 	disableStepperPower();
 }
 
@@ -73,7 +73,7 @@ void runToClosePosition()
 {
 	//restore
 	enableStepperPower();
-	stepper.runToNewPosition(CLOSE * length);
+	stepper.runToNewPosition(CLOSE);
 	disableStepperPower();
 }
 
