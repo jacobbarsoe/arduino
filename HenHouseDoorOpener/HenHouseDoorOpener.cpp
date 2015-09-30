@@ -28,8 +28,8 @@
 
 //door open length
 //flip if direction is opposite 
-#define OPEN (long)200*step_mm; //20cm
-#define CLOSE (long)0;
+#define OPEN (long)200*step_mm //20cm
+#define CLOSE (long)0
 
 #include "PrintDataUtil.h"
 #include "stepperWork.h"
