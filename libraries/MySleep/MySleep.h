@@ -28,6 +28,10 @@ void setup_watchdog(int ii) {
   // set new watchdog timeout value
   WDTCSR = bb;
   WDTCSR |= _BV(WDIE);
+
+  //disable brownout
+  MCUCR = bit (BODS) | bit (BODSE);  // turn on brown-out enable select
+  MCUCR = bit (BODS);        // this must be done within 4 clock cycles of above
 }
 
 void enable_sleepmodes()
