@@ -58,7 +58,7 @@ volatile int f_wdt = 0;
 
 //ISRs
 ISR(WDT_vect) {
-  f_wdt++;
+  ++f_wdt;
 }
 
 void btnisr()
@@ -98,7 +98,7 @@ void today(uint8_t* _today)
   _today[tl_hour] = 12;
   _today[tl_day] = day();
   _today[tl_month] = month();
-  _today[tl_year] = year();
+  _today[tl_year] = year()-2000;
 }
 
 void setAlarm(uint8_t hours, uint8_t minutes, Today *day)
@@ -108,10 +108,10 @@ void setAlarm(uint8_t hours, uint8_t minutes, Today *day)
   _today[tl_minute] = minutes;
   _today[tl_hour] = hours;
 
-  memcpy(_today, day, sizeof(Today));
-  
+  memcpy(day, _today, sizeof(Today));
+
   TRACE("Alarm set to ");
-  TRACE(day->year);
+  TRACE(day->year+2000);
   TRACE(day->month);
   TRACE(day->day);
   TRACE(day->hour);
@@ -139,26 +139,26 @@ void setNextWakeUp()
 {
   printDateTime(now());
   if (!isBeforeSunrise() && isBeforeSunset())
-    {
-      TRACE("Setting next event on Sunset later today");
-      uint8_t next_sunset[tl_year+1];
+  {
+	  TRACE("Setting next event on Sunset later today");
+	  uint8_t next_sunset[tl_year+1];
 
-      today(next_sunset);
-      timelord.SunSet(next_sunset);
-      setAlarm(next_sunset[tl_hour], next_sunset[tl_minute], &nextSunset );
-    }
+	  today(next_sunset);
+	  timelord.SunSet(next_sunset);
+	  setAlarm(next_sunset[tl_hour], next_sunset[tl_minute], &nextSunset );
+  }
   else if (isBeforeSunrise() && isBeforeSunset())
-    {
-      TRACE("Setting next event on Sunrise later today");
-      uint8_t next_sunrise[tl_year+1];
+  {
+	  TRACE("Setting next event on Sunrise later today");
+	  uint8_t next_sunrise[tl_year+1];
 
-      today(next_sunrise);
-      timelord.SunRise(next_sunrise);
-      setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
-    }
+	  today(next_sunrise);
+	  timelord.SunRise(next_sunrise);
+	  setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
+  }
   else
-    {
-      TRACE("Setting next event on Sunrise tomorrow");
+  {
+	  TRACE("Setting next event on Sunrise tomorrow");
       uint8_t next_sunrise[tl_year+1];
 
       //fake tomorrow
@@ -189,6 +189,8 @@ bool isTime(Today* next)
   TRACE(minute());
 
   return (next->year == year() &&
+
+  return (next->year == year()-2000 &&
 	  next->month == month() &&
 	  next->day == day() &&
 	  next->hour == hour() &&
@@ -207,7 +209,8 @@ void setup()
 
   //handle RTC time clock etc
   pinMode(RTC_VCC, OUTPUT);
-  timelord.Position(56.16,-10.4);
+  timelord.TimeZone(60);
+  timelord.Position(56.16,10.4); //west and south negative
   syncClockToRTC();
   setNextWakeUp();
 
@@ -223,34 +226,41 @@ void setup()
 // The loop function is called in an endless loop
 void loop()
 {
+#ifdef JABK_SERIAL_DEBUG
+  delay(100);
+#endif
   system_sleep();
+#ifdef JABK_SERIAL_DEBUG
+  if (f_wdt > 0) //wake every 9 sec
+#else
   if (f_wdt > 6) //wake every 54 sec
-    {
+#endif
+  {
       syncClockToRTC();
       f_wdt = 0; //reset timer
       //checks if we are at the minute where this happens
       if (isTime(&nextSunset))
-	{
-	  TRACE("Closing Start");
-	  printDateTime(now());
-	  runToClosePosition();
-	  printDateTime(now());
-	  TRACE("Closing End");
-	  setNextWakeUp();
-	}
+      {
+		  TRACE("Closing Start");
+		  printDateTime(now());
+		  runToClosePosition();
+		  printDateTime(now());
+		  TRACE("Closing End");
+		  setNextWakeUp();
+      }
       else if (isTime(&nextSunrise))
-	{
-	  TRACE("Opening Start");
-	  printDateTime(now());
-	  runToOpenPosition();
-	  printDateTime(now());
-	  TRACE("Opening End");
-	  setNextWakeUp();
-	}
-    }
+      {
+		  TRACE("Opening Start");
+		  printDateTime(now());
+		  runToOpenPosition();
+		  printDateTime(now());
+		  TRACE("Opening End");
+		  setNextWakeUp();
+      }
+  }
   else if (buttonPress)
-    {
+  {
       togglePosition();
       buttonPress = false;
-    }
+  }
 }
