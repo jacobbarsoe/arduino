@@ -29,22 +29,17 @@
 		<link>
 			<name>Libraries/RF24</name>
 			<type>2</type>
-			<locationURI>ArduinoPivateLibPath/RF24</locationURI>
+			<locationURI>ArduinoPrivateLibPath/RF24</locationURI>
 		</link>
 		<link>
 			<name>Libraries/SPI</name>
 			<type>2</type>
-			<locationURI>ArduinoPivateLibPath/SPI</locationURI>
+			<locationURI>ArduinoHardwareLibPath/SPI</locationURI>
 		</link>
 		<link>
 			<name>arduino/core</name>
 			<type>2</type>
-			<locationURI>ArduinoPlatformPath/cores/arduino</locationURI>
-		</link>
-		<link>
-			<name>arduino/variant</name>
-			<type>2</type>
-			<locationURI>ArduinoPinPath/standard</locationURI>
+			<locationURI>ArduinoPlatformPath</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
@@ -54,7 +49,7 @@
 		</variable>
 		<variable>
 			<name>ArduinoPinPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr/variants</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr</value>
 		</variable>
 		<variable>
 			<name>ArduinoPlatformPath</name>
