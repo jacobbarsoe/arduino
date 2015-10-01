@@ -49,7 +49,7 @@ int batt = 0;
 // Watchdog Interrupt Service / is executed when  watchdog timed out
 ISR(WDT_vect)
 {
-  f_wdt++;  // set global flag  sei();
+  f_wdt++;  
 }
 
 void isr()
@@ -89,6 +89,9 @@ void setup_radio()
 
 void sendOverRadio()
 {
+  char outBuffer[16];
+  outBuffer[16]=0;
+
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
   setup_radio();
@@ -96,26 +99,8 @@ void sendOverRadio()
   radio.powerUp();
   TRACE("powerup");
 
-  //prepare 
-  uint8_t data1 = 0;
-  char temp[5];
-  char outBuffer[16];
-
-  outBuffer[16]=0;
-  //data1 is a counter
-  data1 = counter++;
-
   // Append the hex nodeID to the beginning of the payload
-  sprintf(outBuffer,"%2X",nodeID);
-  strcat(outBuffer,",");
-  sprintf(temp,"%03d",data1);
-  strcat(outBuffer,temp);
-  strcat(outBuffer,",");
-  sprintf(temp,"%04d",forbrug);
-  strcat(outBuffer,temp);
-  strcat(outBuffer,",");
-  sprintf(temp,"%04d",batt);
-  strcat(outBuffer,temp);
+  sprintf(outBuffer,"%2X,%03d,%04d,%04d",nodeID,++counter,forbrug,batt);
 
   // Stop listening and write to radio
   radio.stopListening();
