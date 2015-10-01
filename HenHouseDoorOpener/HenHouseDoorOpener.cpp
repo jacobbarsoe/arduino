@@ -67,9 +67,18 @@ void btnisr()
   //buttonPress= true;
 }
 
-inline void setRTCVCC(int on)
+void setRTCVCC(int on)
 {
   digitalWrite(RTC_VCC, on);
+  digitalWrite(SDA,on);
+  digitalWrite(SCL,on);
+
+  if (on)
+	  TWCR |= (bit(TWEN) | bit(TWIE) | bit(TWEA));
+  else
+	  TWCR &= ~(bit(TWEN) | bit(TWIE) | bit(TWEA));
+
+  delay(1);
 }
 
 void syncClockToRTC()
@@ -188,7 +197,7 @@ bool isTime(Today* next)
   TRACE(hour());
   TRACE(minute());
 
-  return (next->year == year() &&
+  return true;
 
   return (next->year == year()-2000 &&
 	  next->month == month() &&
@@ -209,6 +218,7 @@ void setup()
 
   //handle RTC time clock etc
   pinMode(RTC_VCC, OUTPUT);
+  setRTCVCC(0);
   timelord.TimeZone(60);
   timelord.Position(56.16,10.4); //west and south negative
   syncClockToRTC();

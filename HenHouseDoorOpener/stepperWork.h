@@ -16,22 +16,6 @@
 
 AccelStepper stepper(AccelStepper::DRIVER, STEPPER_STEP, STEPPER_DIR);
 
-void setupSteppers()
-{
-	pinMode(STEPPER_POWER, OUTPUT);
-	pinMode(STEPPER_DIR, OUTPUT);
-	pinMode(STEPPER_STEP, OUTPUT);
-	stepper.setMaxSpeed(100000);
-	stepper.setAcceleration(1000);
-
-	stepper.setCurrentPosition(OPEN);
-
-	digitalWrite(STEPPER_POWER, 0);
-	digitalWrite(STEPPER_DIR, 1);
-	digitalWrite(STEPPER_STEP, 1);
-}
-
-
 void enableStepperPower()
 {
 	digitalWrite(STEPPER_POWER, 1);
@@ -43,6 +27,19 @@ void disableStepperPower()
 	digitalWrite(STEPPER_DIR, 1);
 	digitalWrite(STEPPER_STEP, 1);
 
+}
+
+void setupSteppers()
+{
+	pinMode(STEPPER_POWER, OUTPUT);
+	pinMode(STEPPER_DIR, OUTPUT);
+	pinMode(STEPPER_STEP, OUTPUT);
+	stepper.setMaxSpeed(100000);
+	stepper.setAcceleration(1000);
+
+	stepper.setCurrentPosition(OPEN);
+
+	disableStepperPower();
 }
 
 void togglePosition()
