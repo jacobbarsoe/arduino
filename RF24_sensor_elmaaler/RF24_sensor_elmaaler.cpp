@@ -3,6 +3,7 @@
  
  go to deep sleep in between transmits (one way)
  */
+#include <Arduino.h>
 
 #include <avr/sleep.h>
 #include <avr/wdt.h>
@@ -44,23 +45,28 @@ volatile int forbrug = 0;
 uint8_t counter = 0;
 volatile int flag = 0;
 int batt = 0;
+volatile bool debounce = false;
 
 //****************************************************************  
 // Watchdog Interrupt Service / is executed when  watchdog timed out
 ISR(WDT_vect)
 {
-  f_wdt++;  
+	if (debounce)
+	{
+		debounce = false;
+	}
+	else
+	{
+		f_wdt++;
+	}
 }
 
 void isr()
 {
   if (digitalRead(EL_IRQ_PIN) == 0)
   {
-    while (digitalRead(EL_IRQ_PIN) == 0) //wait up
-    {
-      delay(1);
-    }
-    forbrug++;
+	debounce = true;
+    ++forbrug;
   }
 }
 
@@ -128,7 +134,19 @@ void RF24_system_sleep()
   cbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter OFF
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
   sleep_enable();
-  attachInterrupt(0, isr, LOW);
+  if (!debounce)
+  {
+	  attachInterrupt(0, isr, LOW);
+	  setup_watchdog(9); //8s
+	  TRACE("1");
+	  TRACE_GENERIC(delay(1));
+  }
+  else
+  {
+	  setup_watchdog(4); //250ms debounce
+	  TRACE("0");
+	  TRACE_GENERIC(delay(1));
+  }
   sleep_mode();                        // System sleeps here
   detachInterrupt(0);
   sleep_disable();                     // System continues execution here when watchdog timed out 
