@@ -77,11 +77,11 @@ void setup_radio()
   // Enable this seems to work better
   radio.enableDynamicPayloads();
   radio.setAutoAck(1);
-  radio.setDataRate(RF24_1MBPS);
-  radio.setPALevel(RF24_PA_HIGH);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_MAX);
   radio.setChannel(70);
   radio.setRetries(15,15);
-  radio.setCRCLength(RF24_CRC_16);
+  radio.setCRCLength(RF24_CRC_8);
 
   radio.openWritingPipe(pipes[0]);
   //radio.openReadingPipe(1,pipes[1]);
@@ -90,7 +90,6 @@ void setup_radio()
 void sendOverRadio()
 {
   char outBuffer[16];
-  outBuffer[16]=0;
 
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
@@ -162,7 +161,7 @@ void setup()
 void loop()
 {
   int timeLimit = 5*60/8;
-  TRACE_GENERIC(timeLimit = 0)
+  TRACE_GENERIC(timeLimit = 0);
   if (f_wdt > timeLimit)
   {
     f_wdt = 0;
@@ -182,7 +181,7 @@ void loop()
   }
   TRACE_GENERIC(digitalWrite(TEST_TOGGLE_PIN, LOW)); //measured round trip time to 19ms
   RF24_system_sleep();
-  TRACE_GENERIC(digitalWrite(TEST_TOGGLE_PIN, HIGH);
+  TRACE_GENERIC(digitalWrite(TEST_TOGGLE_PIN, HIGH));
 
 }
 
