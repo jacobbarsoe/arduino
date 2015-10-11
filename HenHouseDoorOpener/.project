@@ -42,6 +42,16 @@
 			<locationURI>ArduinoPrivateLibPath/MySleep</locationURI>
 		</link>
 		<link>
+			<name>Libraries/RF24</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/RF24</locationURI>
+		</link>
+		<link>
+			<name>Libraries/SPI</name>
+			<type>2</type>
+			<locationURI>ArduinoHardwareLibPath/SPI</locationURI>
+		</link>
+		<link>
 			<name>Libraries/Streaming</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/Streaming</locationURI>
