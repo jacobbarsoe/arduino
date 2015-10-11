@@ -2,6 +2,7 @@
 
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
+#include <avr/power.h>
 
 #include <MySleep.h>
 
@@ -13,7 +14,12 @@
 #include <TimeLord.h>
 
 #define BTN_IRQ 3
+#define BTN_VCC 7
 #define RTC_VCC 6
+#define RF_IO_PWR_PIN 9
+#define STEPPER_DIR 4
+#define STEPPER_STEP 5
+#define STEPPER_POWER 8
 
 #define JABK_SERIAL_DEBUG
 
@@ -27,12 +33,13 @@
 #define step_cm (long)10*step_mm
 
 //door open length
-//flip if direction is opposite 
-#define OPEN (long)200*step_mm //20cm
+//flip if direction is opposite
+#define OPEN (long)30*step_mm //30cm
 #define CLOSE (long)0
 
 #include "PrintDataUtil.h"
 #include "stepperWork.h"
+#include "Radio.h"
 
 //typedefs
 typedef struct day_t
@@ -63,8 +70,8 @@ ISR(WDT_vect) {
 
 void btnisr()
 {
-  delay(50);
-  //buttonPress= true;
+  delay(100);
+  buttonPress= true;
 }
 
 void setRTCVCC(int on)
@@ -90,11 +97,11 @@ void syncClockToRTC()
   setRTCVCC(0);
 }
 
-float getTemperature()
+int getTemperature()
 {
-  float temp;
+  int temp;
   setRTCVCC(1);
-  temp = RTC.temperature() / 4.;
+  temp = RTC.temperature() / 4;
   setRTCVCC(0);
   return temp;
 }
@@ -197,8 +204,6 @@ bool isTime(Today* next)
   TRACE(hour());
   TRACE(minute());
 
-  return true;
-
   return (next->year == year()-2000 &&
 	  next->month == month() &&
 	  next->day == day() &&
@@ -230,7 +235,9 @@ void setup()
 
   //btn IRQ
   pinMode(BTN_IRQ, INPUT);   //d3
-  attachInterrupt(1, btnisr, RISING);
+  pinMode(BTN_VCC, OUTPUT);
+  digitalWrite(BTN_VCC,1);
+
 }
 
 // The loop function is called in an endless loop
@@ -239,7 +246,11 @@ void loop()
 #ifdef JABK_SERIAL_DEBUG
   delay(100);
 #endif
+
+  attachInterrupt(1, btnisr, LOW);//only level irq in deep power down
   system_sleep();
+  detachInterrupt(1);
+
 #ifdef JABK_SERIAL_DEBUG
   if (f_wdt > 0) //wake every 9 sec
 #else
@@ -251,6 +262,7 @@ void loop()
       //checks if we are at the minute where this happens
       if (isTime(&nextSunset))
       {
+    	  sendOverRadio();
 		  TRACE("Closing Start");
 		  printDateTime(now());
 		  runToClosePosition();
@@ -260,6 +272,7 @@ void loop()
       }
       else if (isTime(&nextSunrise))
       {
+    	  sendOverRadio();
 		  TRACE("Opening Start");
 		  printDateTime(now());
 		  runToOpenPosition();
@@ -268,9 +281,11 @@ void loop()
 		  setNextWakeUp();
       }
   }
-  else if (buttonPress)
+  if (buttonPress)
   {
+	  TRACE("Toggle Position");
       togglePosition();
       buttonPress = false;
+      TRACE("Toggle Position DONE");
   }
 }
