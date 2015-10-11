@@ -23,6 +23,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/arduino/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/RF24}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/MySleep}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.495218093" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -32,6 +33,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/arduino/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/RF24}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RF24_sensor_elmaaler/Libraries/MySleep}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.1541176681" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>

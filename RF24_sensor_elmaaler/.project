@@ -27,6 +27,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Libraries/MySleep</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/MySleep</locationURI>
+		</link>
+		<link>
 			<name>Libraries/RF24</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/RF24</locationURI>
@@ -39,21 +44,26 @@
 		<link>
 			<name>arduino/core</name>
 			<type>2</type>
-			<locationURI>ArduinoPlatformPath</locationURI>
+			<locationURI>ArduinoPlatformPath/arduino</locationURI>
+		</link>
+		<link>
+			<name>arduino/variant</name>
+			<type>2</type>
+			<locationURI>ArduinoPinPath/eightanaloginputs</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>ArduinoHardwareLibPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr/libraries</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/libraries</value>
 		</variable>
 		<variable>
 			<name>ArduinoPinPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/variants</value>
 		</variable>
 		<variable>
 			<name>ArduinoPlatformPath</name>
-			<value>file:/home/jabk/projects/privat/arduino/arduino-1.5.1/hardware/arduino/avr</value>
+			<value>file:/home/jabk/projects/privat/arduino/arduino-1.6.5/hardware/arduino/avr/cores</value>
 		</variable>
 	</variableList>
 </projectDescription>
