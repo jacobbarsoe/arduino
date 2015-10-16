@@ -15,13 +15,18 @@
 
 #define BTN_IRQ 3
 #define BTN_VCC 7
+#define BTN_GND 15
 #define RTC_VCC 6
-#define RF_IO_PWR_PIN 9
+#define RF_IO_GND_PIN 14
+#define RF_IO_PWR_PIN 2 //9 and 10 is ce and csn
+
+#define RF_CE 9
+#define RF_CSN 10
 #define STEPPER_DIR 4
 #define STEPPER_STEP 5
 #define STEPPER_POWER 8
 
-#define JABK_SERIAL_DEBUG
+//#define JABK_SERIAL_DEBUG
 
 #ifdef  JABK_SERIAL_DEBUG
 #define TRACE(x) Serial.println(x)
@@ -34,7 +39,7 @@
 
 //door open length
 //flip if direction is opposite
-#define OPEN (long)30*step_mm //30cm
+#define OPEN (long)300*step_mm //30cm
 #define CLOSE (long)0
 
 #include "PrintDataUtil.h"
@@ -161,7 +166,8 @@ void setNextWakeUp()
 
 	  today(next_sunset);
 	  timelord.SunSet(next_sunset);
-	  setAlarm(next_sunset[tl_hour], next_sunset[tl_minute], &nextSunset );
+	  //set hour+1 on sunset to allow for the hens to get inside
+	  setAlarm(next_sunset[tl_hour]+1, next_sunset[tl_minute], &nextSunset );
   }
   else if (isBeforeSunrise() && isBeforeSunset())
   {
@@ -238,11 +244,21 @@ void setup()
   pinMode(BTN_VCC, OUTPUT);
   digitalWrite(BTN_VCC,1);
 
+  pinMode(RF_IO_PWR_PIN, OUTPUT);
+#ifdef RF_IO_GND_PIN
+  pinMode(RF_IO_GND_PIN, OUTPUT);
+  digitalWrite(RF_IO_GND_PIN, LOW);
+#endif
+#ifdef BTN_GND
+  pinMode(BTN_GND, OUTPUT);
+  digitalWrite(BTN_GND, LOW);
+#endif
 }
 
 // The loop function is called in an endless loop
 void loop()
 {
+  static int hourCounter = 0;
 #ifdef JABK_SERIAL_DEBUG
   delay(100);
 #endif
@@ -262,8 +278,7 @@ void loop()
       //checks if we are at the minute where this happens
       if (isTime(&nextSunset))
       {
-    	  sendOverRadio();
-		  TRACE("Closing Start");
+    	  TRACE("Closing Start");
 		  printDateTime(now());
 		  runToClosePosition();
 		  printDateTime(now());
@@ -272,7 +287,6 @@ void loop()
       }
       else if (isTime(&nextSunrise))
       {
-    	  sendOverRadio();
 		  TRACE("Opening Start");
 		  printDateTime(now());
 		  runToOpenPosition();
@@ -287,5 +301,10 @@ void loop()
       togglePosition();
       buttonPress = false;
       TRACE("Toggle Position DONE");
+  }
+  if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
+  {
+	  hourCounter = 0;
+	  sendOverRadio();
   }
 }

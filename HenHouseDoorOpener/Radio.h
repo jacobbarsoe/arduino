@@ -14,7 +14,7 @@
 #include "RF24.h"
 
 //Globals
-RF24 radio(9,10); // Set up nRF24L01 radio on SPI pin for CE, CSN
+RF24 radio(RF_CE,RF_CSN); // Set up nRF24L01 radio on SPI pin for CE, CSN
 const uint64_t pipes[2] = { 0xF0F0F0F0E2LL, 0x7365727631LL };
 uint16_t nodeID = 2;
 char receivePayload[32];
@@ -66,7 +66,7 @@ int getTemperature();
 
 void sendOverRadio()
 {
-  char outBuffer[16];
+  char outBuffer[18];
 
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
@@ -76,7 +76,8 @@ void sendOverRadio()
   TRACE("powerup");
 
   // Append the hex nodeID to the beginning of the payload
-  sprintf(outBuffer,"%2X,%03d,%04d,%04d",nodeID,++counter,getTemperature(),readVcc());
+  int open = stepper.currentPosition() > 0 ? 1 : 0;
+  sprintf(outBuffer,"%2X,%03d,%04d,%04d,%1d",nodeID,++counter,getTemperature(),readVcc(),open);
 
   // Stop listening and write to radio
   radio.stopListening();
