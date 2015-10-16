@@ -28,10 +28,6 @@ void setup_watchdog(int ii) {
   // set new watchdog timeout value
   WDTCSR = bb;
   WDTCSR |= _BV(WDIE);
-
-  //disable brownout
-  MCUCR = bit (BODS) | bit (BODSE);  // turn on brown-out enable select
-  MCUCR = bit (BODS);        // this must be done within 4 clock cycles of above
 }
 
 void enable_sleepmodes()
@@ -60,7 +56,7 @@ void system_sleep()
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
   sleep_enable();
   sleep_mode();                        // System sleeps here
-  sleep_disable();                     // System continues execution here when watchdog timed out 
+  sleep_disable();                     // System continues execution here when watchdog timed out
   sbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter ON
 }
 
