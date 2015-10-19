@@ -39,7 +39,7 @@
 
 //door open length
 //flip if direction is opposite
-#define OPEN (long)300*step_mm //30cm
+#define OPEN (long)250*step_mm //30cm
 #define CLOSE (long)0
 
 #include "PrintDataUtil.h"
@@ -106,7 +106,7 @@ int getTemperature()
 {
   int temp;
   setRTCVCC(1);
-  temp = RTC.temperature() / 4;
+  temp = (RTC.temperature() +2 )/ 4;
   setRTCVCC(0);
   return temp;
 }
@@ -284,6 +284,7 @@ void loop()
 		  printDateTime(now());
 		  TRACE("Closing End");
 		  setNextWakeUp();
+		  sendOverRadio();
       }
       else if (isTime(&nextSunrise))
       {
@@ -293,6 +294,7 @@ void loop()
 		  printDateTime(now());
 		  TRACE("Opening End");
 		  setNextWakeUp();
+		  sendOverRadio();
       }
   }
   if (buttonPress)
@@ -301,6 +303,7 @@ void loop()
       togglePosition();
       buttonPress = false;
       TRACE("Toggle Position DONE");
+	  sendOverRadio();
   }
   if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
   {
