@@ -15,7 +15,7 @@
 
 //Globals
 RF24 radio(RF_CE,RF_CSN); // Set up nRF24L01 radio on SPI pin for CE, CSN
-const uint64_t pipes[2] = { 0xF0F0F0F0E2LL, 0x7365727631LL };
+const uint64_t pipes[2] = { 0xF0F0F0F0E2LL, 0xF0F0F0F0D2LL };
 uint16_t nodeID = 2;
 char receivePayload[32];
 uint8_t counter = 0;
@@ -44,7 +44,7 @@ int readVcc() {
   return result; // Vcc in millivolts
 }
 
-void setup_radio()
+void setup_radio(bool openForReading)
 {
   //CONFIGURE RADIO
   radio.begin();
@@ -59,35 +59,80 @@ void setup_radio()
 
 
   radio.openWritingPipe(pipes[0]);
-  //radio.openReadingPipe(1,pipes[1]);
+  if (openForReading)
+	  radio.openReadingPipe(1,pipes[1]);
 }
 
 int getTemperature();
+time_t syncClockToRTC();
+void setRTCVCC(int on);
 
-void sendOverRadio()
+struct Payload
 {
-  char outBuffer[18];
+	char nodeID;
+	char counter;
+	char openOrClosed;
+	char receiveEnabled;
+	int16_t  temperature;
+	int16_t  batteryVoltage;
+	long time;
+	Today openTime;
+	Today closeTime;
+} __attribute__ ((packed));
+
+void receiveTime()
+{
+	time_t syncTime;
+	while(!radio.available()) // If an ack with payload was received
+	{
+		delay(5);
+	}
+	TRACE("received Data");
+	radio.read( &syncTime, sizeof(time_t));     // Read it, and display the response time
+	setRTCVCC(1);
+	RTC.set(syncTime);
+	delay(5);
+	setRTCVCC(0);
+}
+
+void sendOverRadio(bool receiveEnabled=false)
+{
+  struct Payload data;
 
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
-  setup_radio();
+  setup_radio(receiveEnabled);
   TRACE("setup");
   radio.powerUp();
   TRACE("powerup");
 
   // Append the hex nodeID to the beginning of the payload
-  int open = stepper.currentPosition() > 0 ? 1 : 0;
-  sprintf(outBuffer,"%2X,%03d,%04d,%04d,%1d",nodeID,++counter,getTemperature(),readVcc(),open);
+  data.nodeID = nodeID;
+  data.counter = ++counter;
+  data.openOrClosed = stepper.currentPosition() > 0 ? 1 : 0;
+  data.receiveEnabled = receiveEnabled;
+  data.temperature = getTemperature();
+  data.batteryVoltage = readVcc();
+  data.time = syncClockToRTC();
+  data.openTime = nextSunrise;
+  data.closeTime = nextSunset;
 
   // Stop listening and write to radio
   radio.stopListening();
-  TRACE(outBuffer);
+  //TRACE(outBuffer);
   TRACE("stoplistening");
 
   // Send to hub
-  if ( radio.write( outBuffer, strlen(outBuffer)) )
+  if ( radio.write( &data, sizeof(data)) )
   {
     TRACE("Send successful");
+
+    radio.startListening();
+    if (receiveEnabled) //if firstTime - sync clock with gw
+    {
+	    TRACE("receiveEnabled");
+    	receiveTime();
+    }
   }
   else
   {

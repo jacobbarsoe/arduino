@@ -26,7 +26,7 @@
 #define STEPPER_STEP 5
 #define STEPPER_POWER 8
 
-//#define JABK_SERIAL_DEBUG
+#define JABK_SERIAL_DEBUG
 
 #ifdef  JABK_SERIAL_DEBUG
 #define TRACE(x) Serial.println(x)
@@ -34,7 +34,7 @@
 #define TRACE(x)
 #endif
 
-#define step_mm 4000 //0.9 deg/step , 1/8 stepping. gevind 0.8mm => 360/0.9*8/0.8
+#define step_mm 400 //0.9 deg/step , 1/8 stepping. gevind 8mm => 360/0.9*8/8
 #define step_cm (long)10*step_mm
 
 //door open length
@@ -44,7 +44,6 @@
 
 #include "PrintDataUtil.h"
 #include "stepperWork.h"
-#include "Radio.h"
 
 //typedefs
 typedef struct day_t
@@ -60,6 +59,8 @@ typedef struct day_t
 //Globals
 Today nextSunrise;
 Today nextSunset;
+
+#include "Radio.h"
 
 TimeLord timelord; //Hinnerup DK, 56.16N,10.4
 
@@ -93,13 +94,14 @@ void setRTCVCC(int on)
   delay(1);
 }
 
-void syncClockToRTC()
+time_t syncClockToRTC()
 {
   time_t t;
   setRTCVCC(1);
   t = RTC.get();
   setTime(t);
   setRTCVCC(0);
+  return t;
 }
 
 int getTemperature()
@@ -110,7 +112,6 @@ int getTemperature()
   setRTCVCC(0);
   return temp;
 }
-
 
 void today(uint8_t* _today)
 {
@@ -184,7 +185,7 @@ void setNextWakeUp()
       uint8_t next_sunrise[tl_year+1];
 
       //fake tomorrow
-      adjustTime((long)60*60*24);
+      adjustTime(((long)60)*60*24);
       today(next_sunrise);
       timelord.SunRise(next_sunrise);
       setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
@@ -227,14 +228,6 @@ void setup()
 
   setupSteppers();
 
-  //handle RTC time clock etc
-  pinMode(RTC_VCC, OUTPUT);
-  setRTCVCC(0);
-  timelord.TimeZone(60);
-  timelord.Position(56.16,10.4); //west and south negative
-  syncClockToRTC();
-  setNextWakeUp();
-
   //setup cpu sleep via watchdog
   setup_watchdog(9);
   enable_sleepmodes();
@@ -253,6 +246,17 @@ void setup()
   pinMode(BTN_GND, OUTPUT);
   digitalWrite(BTN_GND, LOW);
 #endif
+  pinMode(RTC_VCC, OUTPUT);
+  setRTCVCC(0);
+
+  //on startup - sync time with GW (rPI)
+  sendOverRadio(true);
+
+  //handle RTC time clock etc
+  timelord.TimeZone(0); //time sync from gw is in GMT. do not bother localtime
+  timelord.Position(56.16,10.4); //west and south negative
+  syncClockToRTC();
+  setNextWakeUp();
 }
 
 // The loop function is called in an endless loop
@@ -305,7 +309,7 @@ void loop()
       TRACE("Toggle Position DONE");
 	  sendOverRadio();
   }
-  if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
+  //if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
   {
 	  hourCounter = 0;
 	  sendOverRadio();
