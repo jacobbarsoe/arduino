@@ -26,7 +26,7 @@
 #define STEPPER_STEP 5
 #define STEPPER_POWER 8
 
-#define JABK_SERIAL_DEBUG
+//#define JABK_SERIAL_DEBUG
 
 #ifdef  JABK_SERIAL_DEBUG
 #define TRACE(x) Serial.println(x)
@@ -177,6 +177,13 @@ void setNextWakeUp()
 
 	  today(next_sunrise);
 	  timelord.SunRise(next_sunrise);
+
+	  //no later than 7 o'clock
+	  if (next_sunrise[tl_hour] > 7)
+	  {
+		  next_sunrise[tl_hour] = 7;
+		  next_sunrise[tl_minute] = 0;
+	  }
 	  setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
   }
   else
@@ -188,6 +195,13 @@ void setNextWakeUp()
       adjustTime(((long)60)*60*24);
       today(next_sunrise);
       timelord.SunRise(next_sunrise);
+
+	  //no later than 7 o'clock
+	  if (next_sunrise[tl_hour] > 7)
+	  {
+		  next_sunrise[tl_hour] = 7;
+		  next_sunrise[tl_minute] = 0;
+	  }
       setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
 
       //resync time
@@ -309,7 +323,7 @@ void loop()
       TRACE("Toggle Position DONE");
 	  sendOverRadio();
   }
-  //if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
+  if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
   {
 	  hourCounter = 0;
 	  sendOverRadio();
