@@ -7,3 +7,12 @@
 [submodule "libraries/timelord"]
 	path = libraries/timelord
 	url = git@github.com:probonopd/TimeLord.git
+[submodule "libraries/RCArduinoFastLib"]
+	path = libraries/RCArduinoFastLib
+	url = git@github.com:scottjgibson/RCArduinoFastLib.git
+[submodule "libraries/PinChangeInt"]
+	path = libraries/PinChangeInt
+	url = git@github.com:GreyGnome/PinChangeInt.git
+[submodule "libraries/StepperDriver"]
+	path = libraries/StepperDriver
+	url = https://github.com/laurb9/StepperDriver.git
