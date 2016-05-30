@@ -16,3 +16,6 @@
 [submodule "libraries/StepperDriver"]
 	path = libraries/StepperDriver
 	url = https://github.com/laurb9/StepperDriver.git
+[submodule "MarlinDelta"]
+	path = MarlinDelta
+	url = git@github.com:jacobbarsoe/Marlin.git
