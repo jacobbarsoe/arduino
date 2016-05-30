@@ -33,7 +33,7 @@ void setupSteppers()
 	stepper.setMaxSpeed(100000);
 	stepper.setAcceleration(1000);
 
-	stepper.setCurrentPosition(OPEN);
+	stepper.setCurrentPosition(CLOSE);
 
 	disableStepperPower();
 }

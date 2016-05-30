@@ -19,6 +19,7 @@
 #define RTC_VCC 6
 #define RF_IO_GND_PIN 14
 #define RF_IO_PWR_PIN 2 //9 and 10 is ce and csn
+#define CHARGE_ENABLE 16
 
 #define RF_CE 9
 #define RF_CSN 10
@@ -39,7 +40,7 @@
 
 //door open length
 //flip if direction is opposite
-#define OPEN (long)250*step_mm //30cm
+#define OPEN (long)230*step_mm //30cm
 #define CLOSE (long)0
 
 #include "PrintDataUtil.h"
@@ -146,7 +147,7 @@ bool isBeforeSunrise()
   uint8_t sunrise[tl_year+1];
   today(sunrise);
   timelord.SunRise(sunrise);
-  return (hour()*60 + minute() < sunrise[tl_hour]*60 + sunrise[tl_minute]);
+  return (hour()*60 + minute() < (int)sunrise[tl_hour]*60 + sunrise[tl_minute]);
 }
 
 bool isBeforeSunset()
@@ -154,7 +155,7 @@ bool isBeforeSunset()
   uint8_t sunset[tl_year+1];
   today(sunset);
   timelord.SunSet(sunset);
-  return (hour()*60 + minute() < sunset[tl_hour]*60 + sunset[tl_minute]);
+  return (hour()*60 + minute() < (int)sunset[tl_hour]*60 + sunset[tl_minute]);
 }
 
 void setNextWakeUp()
@@ -167,8 +168,18 @@ void setNextWakeUp()
 
 	  today(next_sunset);
 	  timelord.SunSet(next_sunset);
-	  //set hour+1 on sunset to allow for the hens to get inside
-	  setAlarm(next_sunset[tl_hour]+1, next_sunset[tl_minute], &nextSunset );
+	  //set time+40min on sunset to allow for the hens to get inside
+	  uint8_t hour = next_sunset[tl_hour]+1;
+	  uint8_t minute = next_sunset[tl_minute];
+
+	  minute += 40;
+	  if (minute >= 60)
+	  {
+		  minute -= 60;
+		  ++hour;
+	  }
+
+	  setAlarm(hour, minute, &nextSunset );
   }
   else if (isBeforeSunrise() && isBeforeSunset())
   {
@@ -178,11 +189,11 @@ void setNextWakeUp()
 	  today(next_sunrise);
 	  timelord.SunRise(next_sunrise);
 
-	  //no later than 7 o'clock
-	  if (next_sunrise[tl_hour] > 7)
+	  //no later than 7 o'clock (6 gmt)
+	  if (next_sunrise[tl_hour] > 5)
 	  {
-		  next_sunrise[tl_hour] = 7;
-		  next_sunrise[tl_minute] = 0;
+		  next_sunrise[tl_hour] = 5;
+		  next_sunrise[tl_minute] = 30;
 	  }
 	  setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
   }
@@ -196,10 +207,10 @@ void setNextWakeUp()
       today(next_sunrise);
       timelord.SunRise(next_sunrise);
 
-	  //no later than 7 o'clock
-	  if (next_sunrise[tl_hour] > 7)
+	  //no later than 7 o'clock  (6 gmt)
+	  if (next_sunrise[tl_hour] > 6)
 	  {
-		  next_sunrise[tl_hour] = 7;
+		  next_sunrise[tl_hour] = 6;
 		  next_sunrise[tl_minute] = 0;
 	  }
       setAlarm(next_sunrise[tl_hour], next_sunrise[tl_minute], &nextSunrise);
@@ -208,6 +219,13 @@ void setNextWakeUp()
       syncClockToRTC();
     }
 }
+
+bool isOpen()
+{
+	long pos = stepper.currentPosition();
+	return pos == CLOSE ? false : true;
+}
+
 
 //check every minute if we are within the minute where we close or open
 bool isTime(Today* next)
@@ -225,13 +243,35 @@ bool isTime(Today* next)
   TRACE(hour());
   TRACE(minute());
 
+  int minutesSinceMidnight = (int)next->hour * 60 + next->minute;
+  int minutesSinceMidnightNow = hour() * 60 + minute();
+
   return (next->year == year()-2000 &&
 	  next->month == month() &&
 	  next->day == day() &&
-	  next->hour == hour() &&
-	  next->minute == minute());
+	  (minutesSinceMidnightNow > minutesSinceMidnight &&
+	   minutesSinceMidnightNow < minutesSinceMidnight + 2));
 }
 
+void trickleCharge()
+{
+	const int TRICKLE_CHARGE_START = 4100;
+	const int TRICKLE_CHARGE_STOP = 4200;
+
+	int vcc = readVcc();
+	if (vcc < TRICKLE_CHARGE_START)
+	{
+		digitalWrite(CHARGE_ENABLE, LOW);
+	}
+	else if (vcc > TRICKLE_CHARGE_STOP)
+	{
+		digitalWrite(CHARGE_ENABLE, HIGH);
+	}
+	else
+	{
+		//hysterisis
+	}
+}
 
 void setup()
 {
@@ -260,6 +300,11 @@ void setup()
   pinMode(BTN_GND, OUTPUT);
   digitalWrite(BTN_GND, LOW);
 #endif
+#ifdef CHARGE_ENABLE
+  pinMode(CHARGE_ENABLE, OUTPUT);
+  digitalWrite(CHARGE_ENABLE, LOW);
+#endif
+
   pinMode(RTC_VCC, OUTPUT);
   setRTCVCC(0);
 
@@ -281,9 +326,9 @@ void loop()
   delay(100);
 #endif
 
-  attachInterrupt(1, btnisr, LOW);//only level irq in deep power down
+//  attachInterrupt(1, btnisr, LOW);//only level irq in deep power down
   system_sleep();
-  detachInterrupt(1);
+ // detachInterrupt(1);
 
 #ifdef JABK_SERIAL_DEBUG
   if (f_wdt > 0) //wake every 9 sec
@@ -294,7 +339,7 @@ void loop()
       syncClockToRTC();
       f_wdt = 0; //reset timer
       //checks if we are at the minute where this happens
-      if (isTime(&nextSunset))
+      if (isTime(&nextSunset) && isOpen())
       {
     	  TRACE("Closing Start");
 		  printDateTime(now());
@@ -304,7 +349,7 @@ void loop()
 		  setNextWakeUp();
 		  sendOverRadio();
       }
-      else if (isTime(&nextSunrise))
+      else if (isTime(&nextSunrise) && !isOpen())
       {
 		  TRACE("Opening Start");
 		  printDateTime(now());
@@ -326,6 +371,8 @@ void loop()
   if (++hourCounter > 38) //1800*1.15/54 (15% drift due to wdog on bat voltage approx 3V)
   {
 	  hourCounter = 0;
+	  setNextWakeUp(); //compute every 5min
 	  sendOverRadio();
+	  trickleCharge();
   }
 }
