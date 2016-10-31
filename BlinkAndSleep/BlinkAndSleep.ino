@@ -53,11 +53,11 @@ void system_sleep() {
   sbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter ON
 }
 
-int f_wdt = 0;
+int RadioWakeUpTime = 0;
 //****************************************************************
 // Watchdog Interrupt Service / is executed when  watchdog timed out
 ISR(WDT_vect) {
-  ++f_wdt;  // set global flag  sei();
+  ++RadioWakeUpTime;  // set global flag  sei();
 }
 
 void enable_sleepmodes()
@@ -92,12 +92,12 @@ void loop()
 	digitalWrite(SDA,0);
 	digitalWrite(SCL,0);
 	TWCR &= ~(bit(TWEN) | bit(TWIE) | bit(TWEA));
-	if (f_wdt>0)
+	if (RadioWakeUpTime>0)
 	{
 		//restore
 		digitalWrite(13,1);
 		delay(1000);
 		digitalWrite(13,0);
-		f_wdt=0;
+		RadioWakeUpTime=0;
 	}
 }

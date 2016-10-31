@@ -67,12 +67,12 @@ TimeLord timelord; //Hinnerup DK, 56.16N,10.4
 
 volatile bool buttonPress = false;
 
-volatile int f_wdt = 0;
+volatile int RadioWakeUpTime = 0;
 
 
 //ISRs
 ISR(WDT_vect) {
-  ++f_wdt;
+  ++RadioWakeUpTime;
 }
 
 void btnisr()
@@ -331,13 +331,13 @@ void loop()
  // detachInterrupt(1);
 
 #ifdef JABK_SERIAL_DEBUG
-  if (f_wdt > 0) //wake every 9 sec
+  if (RadioWakeUpTime > 0) //wake every 9 sec
 #else
-  if (f_wdt > 6) //wake every 54 sec
+  if (RadioWakeUpTime > 6) //wake every 54 sec
 #endif
   {
       syncClockToRTC();
-      f_wdt = 0; //reset timer
+      RadioWakeUpTime = 0; //reset timer
       //checks if we are at the minute where this happens
       if (isTime(&nextSunset) && isOpen())
       {
