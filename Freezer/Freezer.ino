@@ -18,7 +18,7 @@
 
 #include "NTC.h"
 
-#define JABK_DEBUG
+//#define JABK_DEBUG
 
 #ifdef JABK_DEBUG
 #define TRACE(x) Serial.println(x)
@@ -75,7 +75,7 @@ void setup_radio()
 void sendOverRadio()
 {
   char outBuffer[16];
-
+  memset(outBuffer, 0, 16);
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
   setup_radio();
@@ -144,17 +144,17 @@ void sampleTemp()
 }
 
 void turnCompressorOn(){
-  state=LOW;
-  digitalWrite(relayPin,state);
-}
-
-void turnCompressorOff(){
   state=HIGH;
   digitalWrite(relayPin,state);
 }
 
+void turnCompressorOff(){
+  state=LOW;
+  digitalWrite(relayPin,state);
+}
+
 boolean isCompressorOff(){
-  return (state==HIGH);
+  return (state==LOW);
 }
 
 boolean isCompressorOn(){
@@ -184,7 +184,7 @@ void loop()
 #define MINUTES 60/8
 	int timeLimit = 5*MINUTES;
 	TRACE_GENERIC(timeLimit = 0);
-
+	timeLimit = 0;
 	if (WakeUpTime > timeLimit)
 	{
 		WakeUpTime = 0;
