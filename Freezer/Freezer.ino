@@ -17,6 +17,7 @@
 #include "RF24.h"
 
 #include "NTC.h"
+#include "SmoothingFilter.h"
 
 //#define JABK_DEBUG
 
@@ -48,6 +49,8 @@ volatile bool debounce = false;
 volatile int sleep_mode = SLEEP_MODE_PWR_DOWN;
 
 NTC ntc(SAMPLE_NTC_ADC, 100000.0f, 303000.0f, 25.0f, 3950);
+SmoothingFilter filter(0.92);
+
 //****************************************************************
 // Watchdog Interrupt Service / is executed when  watchdog timed out
 ISR(WDT_vect)
@@ -74,8 +77,8 @@ void setup_radio()
 
 void sendOverRadio()
 {
-  char outBuffer[16];
-  memset(outBuffer, 0, 16);
+  char outBuffer[22];
+  memset(outBuffer, 32, 22); //memset spaces
   digitalWrite(RF_IO_PWR_PIN, HIGH);
   delay(1);
   setup_radio();
@@ -84,9 +87,11 @@ void sendOverRadio()
   TRACE("powerup");
 
   // Append the hex nodeID to the beginning of the payload
-  char str_temp[6];
+  char str_temp[7];
   dtostrf(temp, 4, 2, str_temp);
-  sprintf(outBuffer,"%2X,%03d,%s,%01d",nodeID,++counter,str_temp,state);
+  char str_temp2[7];
+  dtostrf(filter.getFilteredValue(), 4, 2, str_temp2);
+  sprintf(outBuffer,"%2X,%03d,%s,%s,%01d",nodeID,++counter,str_temp,str_temp2,state);
 
   // Stop listening and write to radio
   radio.stopListening();
@@ -136,6 +141,8 @@ void setup()
   pinMode(relayPin, OUTPUT); //what is pin7?
   digitalWrite(relayPin, 0);
   TRACE("setting up");
+
+  filter.init(ntc.getTemp());
 }
 
 void sampleTemp()
@@ -161,15 +168,24 @@ boolean isCompressorOn(){
   return !isCompressorOff();
 }
 
+#define MINUTES 60/8
+//#define TIMELIMIT 	5*MINUTES
+#define TIMELIMIT 	2*MINUTES
+
+#define HYST 1.5
+#define TEMP_SETPOINT -10 //we want -18 but thermistor is offset by some
+
 void freezerControl()
 {
+	static int freezerRestPeriod = 0;
 	//freezer control
-#define HYST 1.5
-#define TEMP_SETPOINT -18
-	//sample temp every 8 second - 2 filters
-	// one 5min to ignore doors and for compressor control
+	//sample temp every 8 second
+	// wait min 30 min after last on before turning on again
 	sampleTemp();
-	if (temp>TEMP_SETPOINT+HYST && isCompressorOff())
+	filter.newSample(temp);
+
+	//use the filtered for triggering on and still wait at least FreezeRest period
+	if (filter.getFilteredValue()>TEMP_SETPOINT+HYST && isCompressorOff())
 	{
 		turnCompressorOn();
 	}
@@ -181,22 +197,18 @@ void freezerControl()
 // the loop function runs over and over again forever
 void loop()
 {
-#define MINUTES 60/8
-	int timeLimit = 5*MINUTES;
+	int timeLimit = TIMELIMIT;
 	TRACE_GENERIC(timeLimit = 0);
-	timeLimit = 0;
 	if (WakeUpTime > timeLimit)
 	{
 		WakeUpTime = 0;
-
-		freezerControl();
-		TRACE(temp);
-		TRACE(state);
 
 		//RadioStuffBelow
 		sendOverRadio();
 
 		TRACE("woke up");
+
+		freezerControl();
 		TRACE(temp);
 		TRACE(state);
 	}
