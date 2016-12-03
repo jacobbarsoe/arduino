@@ -173,7 +173,7 @@ boolean isCompressorOn(){
 #define TIMELIMIT 	2*MINUTES
 
 #define HYST 1.5
-#define TEMP_SETPOINT -10 //we want -18 but thermistor is offset by some
+#define TEMP_SETPOINT -14 //we want -18 but thermistor is offset by some
 
 void freezerControl()
 {
