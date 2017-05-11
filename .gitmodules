@@ -19,3 +19,6 @@
 [submodule "MarlinDelta"]
 	path = MarlinDelta
 	url = git@github.com:jacobbarsoe/Marlin.git
+[submodule "libraries/Arduino-Temperature-Control-Library"]
+	path = libraries/Arduino-Temperature-Control-Library
+	url = https://github.com/milesburton/Arduino-Temperature-Control-Library
