@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceRoot}/../../arduino/arduino-1.6.5/hardware/arduino/avr/cores/arduino/",
+                "${workspaceRoot}/../../arduino/arduino-1.6.5/hardware/tools/avr/avr/include/",
+                "${workspaceRoot}",
+                "${workspaceRoot}/libraries/SPI",
+                "${workspaceRoot}/libraries/RF24",
+                "${workspaceRoot}/libraries/MySleep"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": false,
+                "path": [
+                    "${workspaceRoot}/../../arduino/arduino-1.6.5/hardware/arduino/avr/cores/arduino/",
+                    "${workspaceRoot}/../../arduino/arduino-1.6.5/hardware/tools/avr/avr/include/",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/libraries/SPI",
+                    "${workspaceRoot}/libraries/RF24",
+                    "${workspaceRoot}/libraries/MySleep"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
