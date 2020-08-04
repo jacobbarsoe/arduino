@@ -1,5 +1,5 @@
 /*
-  Send freezer data over RF24 and control temp
+  Send data over RF24
 
  go to deep sleep in between transmits (one way)
  */
@@ -15,11 +15,9 @@
 #include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
+#include "ReadVcc.h"
 
-#include "NTC.h"
-#include "SmoothingFilter.h"
-
-//#define JABK_DEBUG
+#define JABK_DEBUG
 
 #ifdef JABK_DEBUG
 #define TRACE(x) Serial.println(x)
@@ -30,39 +28,33 @@
 #endif
 
 //pins
-#define RF_IO_PWR_PIN       6
-#define SAMPLE_NTC_ADC     3
-#define relayPin           13
-
+#define TEST_TOGGLE_PIN     5
+#define RF_IO_PWR_PIN       8
+#define RF_IO_GND_PIN       7
 
 //Globals
-#ifdef RADIO
 RF24 radio(9,10); // Set up nRF24L01 radio on SPI pin for CE, CSN
-#endif
-
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0x7365727631LL };
-uint16_t nodeID = 2; //1=el, 2=freezer
+uint16_t nodeID = 1;
 char receivePayload[32];
 
-volatile int WakeUpTime;
-volatile float temp = 0.0f;
+volatile int f_wdt;
+volatile int payload = 0;
 uint8_t counter = 0;
 volatile int flag = 0;
-int state = 0;
-volatile bool debounce = false;
-volatile int sleep_mode = SLEEP_MODE_PWR_DOWN;
+int batt = 0;
 
-NTC ntc(SAMPLE_NTC_ADC, 100000.0f, 303000.0f, 25.0f, 3950);
-SmoothingFilter filter(0.92);
+volatile int sleep_mode = SLEEP_MODE_PWR_DOWN;
 
 //****************************************************************
 // Watchdog Interrupt Service / is executed when  watchdog timed out
 ISR(WDT_vect)
 {
-	++WakeUpTime;
+	++f_wdt;
 }
 
-#ifdef RADIO
+
+
 void setup_radio()
 {
   //CONFIGURE RADIO
@@ -75,16 +67,15 @@ void setup_radio()
   radio.setChannel(70);
   radio.setRetries(15,15);
   radio.setCRCLength(RF24_CRC_8);
+
   radio.openWritingPipe(pipes[0]);
   //radio.openReadingPipe(1,pipes[1]);
 }
 
-
 void sendOverRadio()
 {
-  char outBuffer[22];
-  memset(outBuffer, 32, 22); //memset spaces
-  digitalWrite(RF_IO_PWR_PIN, HIGH);
+  char outBuffer[16];
+
   delay(1);
   setup_radio();
   TRACE("setup");
@@ -92,11 +83,7 @@ void sendOverRadio()
   TRACE("powerup");
 
   // Append the hex nodeID to the beginning of the payload
-  char str_temp[7];
-  dtostrf(temp, 4, 2, str_temp);
-  char str_temp2[7];
-  dtostrf(filter.getFilteredValue(), 4, 2, str_temp2);
-  sprintf(outBuffer,"%2X,%03d,%s,%s,%01d",nodeID,++counter,str_temp,str_temp2,state);
+  sprintf(outBuffer,"%2X,%03d,%04d,%04d",nodeID,++counter, batt, payload);
 
   // Stop listening and write to radio
   radio.stopListening();
@@ -114,9 +101,7 @@ void sendOverRadio()
   }
 
   radio.powerDown();
-  digitalWrite(RF_IO_PWR_PIN, LOW);
 }
-#endif
 
 //****************************************************************
 // set system into the sleep state
@@ -136,93 +121,52 @@ void setup()
 {
   TRACE_GENERIC(Serial.begin(115200));
 
-#ifdef RADIO
   //source vcc to RF through IO pin
   pinMode(RF_IO_PWR_PIN, OUTPUT);
-#endif
+  pinMode(RF_IO_GND_PIN, OUTPUT);
+  digitalWrite(RF_IO_PWR_PIN, LOW);
+  digitalWrite(RF_IO_GND_PIN, LOW);
 
   setup_watchdog(9);//8 seconds
   TRACE_GENERIC(setup_watchdog(8));//debug at 4secs
 
-  //analogReference(INTERNAL);
+  pinMode(TEST_TOGGLE_PIN, OUTPUT);
 
-  pinMode(relayPin, OUTPUT); //what is pin7?
-  digitalWrite(relayPin, 0);
-  TRACE("setting up");
+  analogReference(INTERNAL);
 
-  filter.init(ntc.getTemp());
+  //power reduction
+  // boards.txt: change to mini.menu.cpu.atmega328.bootloader.extended_fuses=0x07
+  //enable tim0, spi and adc
+  PRR = 0xFF & ~((1<<PRTIM0) | (1<<PRSPI) | (1<<PRADC) TRACE_GENERIC(| (1<<PRUSART0)) );
 }
 
-void sampleTemp()
-{
-	temp = ntc.getTemp();
-}
 
-void turnCompressorOn(){
-  state=HIGH;
-  digitalWrite(relayPin,state);
-}
 
-void turnCompressorOff(){
-  state=LOW;
-  digitalWrite(relayPin,state);
-}
-
-boolean isCompressorOff(){
-  return (state==LOW);
-}
-
-boolean isCompressorOn(){
-  return !isCompressorOff();
-}
-
-#define MINUTES 60/8
-//#define TIMELIMIT 	5*MINUTES
-#define TIMELIMIT 	2*MINUTES
-
-#define HYST 1.5
-#define TEMP_SETPOINT -14 //we want -18 but thermistor is offset by some
-
-void freezerControl()
-{
-	static int freezerRestPeriod = 0;
-	//freezer control
-	//sample temp every 8 second
-	// wait min 30 min after last on before turning on again
-	sampleTemp();
-	filter.newSample(temp);
-
-	//use the filtered for triggering on and still wait at least FreezeRest period
-	if (filter.getFilteredValue()>TEMP_SETPOINT+HYST && isCompressorOff())
-	{
-		turnCompressorOn();
-	}
-	else if (temp<TEMP_SETPOINT && isCompressorOn())
-	{
-		turnCompressorOff();
-	}
-}
 // the loop function runs over and over again forever
 void loop()
 {
-	int timeLimit = TIMELIMIT;
-	TRACE_GENERIC(timeLimit = 0);
-	if (WakeUpTime > timeLimit)
-	{
-		WakeUpTime = 0;
-#ifdef RADIO
-		//RadioStuffBelow
-		sendOverRadio();
-#endif
-		TRACE("woke up");
+  int timeLimit = 5*60/8;
+  TRACE_GENERIC(timeLimit = 0);
+  if (f_wdt > timeLimit)
+  {
+    f_wdt = 0;
+    digitalWrite(RF_IO_PWR_PIN, HIGH);
+    sendOverRadio();
+    digitalWrite(RF_IO_PWR_PIN, LOW);
 
-		freezerControl();
+    TRACE("woke up");
+    TRACE(payload);
+    TRACE(batt);
 
-		TRACE(temp);
-		TRACE(filter.getFilteredValue());
-		TRACE(state);
-	}
-	RF24_system_sleep();
+    // we actually send the old batt value. to be
+    // able to ensure the ADC has settled
+    // and we still need to wait 10ms
+    delay(10);
+    //batt = readVcc();
+  }
+  TRACE_GENERIC(digitalWrite(TEST_TOGGLE_PIN, LOW)); //measured round trip time to 19ms
+  RF24_system_sleep();
+  TRACE_GENERIC(digitalWrite(TEST_TOGGLE_PIN, HIGH));
 
 }
 

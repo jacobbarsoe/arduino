@@ -22,3 +22,15 @@
 [submodule "libraries/Arduino-Temperature-Control-Library"]
 	path = libraries/Arduino-Temperature-Control-Library
 	url = https://github.com/milesburton/Arduino-Temperature-Control-Library
+[submodule "libraries/Low-Power"]
+	path = libraries/LowPower
+	url = https://github.com/rocketscream/Low-Power.git
+[submodule "libraries/tinyGSM"]
+	path = libraries/tinyGSM
+	url = https://github.com/vshymanskyy/TinyGSM.git
+[submodule "libraries/StreamDebugger"]
+	path = libraries/StreamDebugger
+	url = https://github.com/vshymanskyy/StreamDebugger.git
+[submodule "libraries/PPM-reader"]
+	path = libraries/PPM-reader
+	url = https://github.com/Nikkilae/PPM-reader.git

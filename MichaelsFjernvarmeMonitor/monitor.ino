@@ -36,21 +36,23 @@ void setup(void)
 void loop(void)
 {
 	static unsigned long oldMillis = 0;
-#define SAMPLE_TIME	60000
+#define SAMPLE_TIME	6000
 	if (oldMillis + SAMPLE_TIME < millis())
 	{
 	  oldMillis = millis();
 	  // call sensors.requestTemperatures() to issue a global temperature
 	  // request to all devices on the bus
-	  sensors.requestTemperatures(); // Send the command to get temperatures
+	 // sensors.requestTemperatures(); // Send the command to get temperatures
 
 	  // After we got the temperatures, we can print them here.
 	  // We use the function ByIndex, and as an example get the temperature from the first sensor only.
 	  Serial.print(millis()/1000);
 	  Serial.print(", ");
-	  Serial.print(sensors.getTempCByIndex(0));
+	  //Serial.print(sensors.getTempCByIndex(0));
+	  Serial.print(34);
 	  Serial.print(", ");
-	  Serial.print(sensors.getTempCByIndex(1));
+	  Serial.print(34);
+	  //Serial.print(sensors.getTempCByIndex(1));
 	  Serial.print(", ");
 	  Serial.print(digitalRead(10));
 	  for(int i=0; i<6; i++)

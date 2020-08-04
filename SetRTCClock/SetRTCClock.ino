@@ -37,11 +37,16 @@
 #include <Time.h>             //http://playground.arduino.cc/Code/Time
 #include <Wire.h>             //http://arduino.cc/en/Reference/Wire
 
+#define VCC 2
+#define GND 1
+
 void setup(void)
 {
     Serial.begin(115200);
-    pinMode(6, OUTPUT);
-    digitalWrite(6,1);
+    pinMode(VCC, OUTPUT);
+    pinMode(GND, OUTPUT);
+    digitalWrite(VCC,1);
+    digitalWrite(GND,0);
     //setSyncProvider() causes the Time library to synchronize with the
     //external RTC by calling RTC.get() every five minutes by default.
     setSyncProvider(RTC.get);
