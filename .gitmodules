@@ -34,3 +34,6 @@
 [submodule "libraries/PPM-reader"]
 	path = libraries/PPM-reader
 	url = https://github.com/Nikkilae/PPM-reader.git
+[submodule "hoverboard-firmware-hack-FOC"]
+	path = hoverboard-firmware-hack-FOC
+	url = https://github.com/EmanuelFeru/hoverboard-firmware-hack-FOC.git
